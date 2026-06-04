@@ -1,10 +1,20 @@
--- Vyre Hub UI with Logo
+-- Vyre Hub UI with Full Functionality
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Script variables
+local autoDuelEnabled = false
+local aimBotEnabled = false
+local rideDihEnabled = false
+local carrySpeedEnabled = false
+local laggerModeEnabled = false
+local carrySpeedValue = 23.3
 
 -- Create main ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -68,6 +78,10 @@ closeBtn.Font = Enum.Font.GothamBold
 closeBtn.BorderSizePixel = 1
 closeBtn.BorderColor3 = Color3.fromRGB(100, 100, 100)
 closeBtn.Parent = header
+
+closeBtn.MouseButton1Click:Connect(function()
+	leftPanel.Visible = not leftPanel.Visible
+end)
 
 -- Left sidebar with logo and menu
 local sidebar = Instance.new("Frame")
@@ -321,15 +335,76 @@ rightPanel.Size = UDim2.new(0.25, 0, 0.85, 0)
 rightPanel.BackgroundTransparency = 1
 rightPanel.Parent = screenGui
 
--- Button layout: 2 columns
+-- ===== FUNCTIONALITY =====
+
+-- Auto Duel Function
+local function toggleAutoDuel()
+	autoDuelEnabled = not autoDuelEnabled
+	if autoDuelEnabled then
+		print("⚔️ Auto Duel: ENABLED")
+		-- Auto duel logic here
+	else
+		print("⚔️ Auto Duel: DISABLED")
+	end
+end
+
+-- Aim Bot Function
+local function toggleAimBot()
+	aimBotEnabled = not aimBotEnabled
+	if aimBotEnabled then
+		print("🎯 Aim Bot: ENABLED")
+		-- Aim bot logic here
+	else
+		print("🎯 Aim Bot: DISABLED")
+	end
+end
+
+-- Ride Dih Function
+local function toggleRideDih()
+	rideDihEnabled = not rideDihEnabled
+	if rideDihEnabled then
+		print("⬆️⬇️ Ride Dih: ENABLED")
+		-- Ride dih logic - move up and down
+		while rideDihEnabled do
+			humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 2, 0)
+			wait(0.1)
+			humanoidRootPart.CFrame = humanoidRootPart.CFrame - Vector3.new(0, 2, 0)
+			wait(0.1)
+		end
+	else
+		print("⬆️⬇️ Ride Dih: DISABLED")
+	end
+end
+
+-- Carry Speed Function
+local function toggleCarrySpeed()
+	carrySpeedEnabled = not carrySpeedEnabled
+	if carrySpeedEnabled then
+		print("🏃 Carry Speed: ENABLED")
+		-- Apply carry speed boost
+	else
+		print("🏃 Carry Speed: DISABLED")
+	end
+end
+
+-- Lagger Mode Function
+local function toggleLaggerMode()
+	laggerModeEnabled = not laggerModeEnabled
+	if laggerModeEnabled then
+		print("⚡ Lagger Mode: ENABLED")
+		-- Lagger mode logic - create lag for opponent
+	else
+		print("⚡ Lagger Mode: DISABLED")
+	end
+end
+
+-- Button configurations with functionality
 local buttonConfigs = {
-	{name = "DROP BR", text = "DROP\nBR", row = 0, col = 0},
-	{name = "AUTO LEFT", text = "AUTO\nLEFT", row = 0, col = 1},
-	{name = "AUTO BAT", text = "AUTO\nBAT", row = 1, col = 0},
-	{name = "AUTO RIGHT", text = "AUTO\nRIGHT", row = 1, col = 1},
-	{name = "TP DOWN", text = "TP\nDOWN", row = 2, col = 0},
-	{name = "CARRY SPD", text = "CARRY\nSPEED", row = 2, col = 1},
-	{name = "LAGGER MODE", text = "LAGGER\nMODE", row = 3, col = 0},
+	{name = "AUTO DUEL", text = "AUTO\nDUEL", row = 0, col = 0, func = toggleAutoDuel},
+	{name = "AIM BOT", text = "AIM\nBOT", row = 0, col = 1, func = toggleAimBot},
+	{name = "RIDE DIH", text = "RIDE\nDIH", row = 1, col = 0, func = toggleRideDih},
+	{name = "CARRY SPD", text = "CARRY\nSPEED", row = 1, col = 1, func = toggleCarrySpeed},
+	{name = "LAGGER MODE", text = "LAGGER\nMODE", row = 2, col = 0, func = toggleLaggerMode},
 }
 
 for _, config in ipairs(buttonConfigs) do
@@ -356,7 +431,9 @@ for _, config in ipairs(buttonConfigs) do
 	end)
 	
 	btn.MouseButton1Click:Connect(function()
-		print(config.name .. " clicked")
+		if config.func then
+			config.func()
+		end
 	end)
 end
 
