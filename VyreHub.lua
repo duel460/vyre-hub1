@@ -1,4 +1,4 @@
--- Vyre Hub UI with Full Functionality
+-- Vyre Hub - Compact Button UI
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -7,14 +7,14 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
 
 -- Script variables
 local autoDuelEnabled = false
 local aimBotEnabled = false
 local rideDihEnabled = false
-local carrySpeedEnabled = false
-local laggerModeEnabled = false
-local carrySpeedValue = 23.3
+local speedEnabled = false
+local speedValue = 55.5
 
 -- Create main ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -23,317 +23,147 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- ===== LEFT PANEL =====
-local leftPanel = Instance.new("Frame")
-leftPanel.Name = "LeftPanel"
-leftPanel.Position = UDim2.new(0.1, 0, 0.15, 0)
-leftPanel.Size = UDim2.new(0.35, 0, 0.7, 0)
-leftPanel.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-leftPanel.BorderSizePixel = 2
-leftPanel.BorderColor3 = Color3.fromRGB(50, 50, 50)
-leftPanel.Parent = screenGui
+-- ===== SPEED CONTROL UI =====
+local speedControlUI = Instance.new("Frame")
+speedControlUI.Name = "SpeedControlUI"
+speedControlUI.Position = UDim2.new(0.35, 0, 0.3, 0)
+speedControlUI.Size = UDim2.new(0.3, 0, 0.4, 0)
+speedControlUI.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+speedControlUI.BorderSizePixel = 2
+speedControlUI.BorderColor3 = Color3.fromRGB(100, 100, 100)
+speedControlUI.Visible = false
+speedControlUI.Parent = screenGui
 
--- Header
-local header = Instance.new("Frame")
-header.Name = "Header"
-header.Position = UDim2.new(0, 0, 0, 0)
-header.Size = UDim2.new(1, 0, 0.08, 0)
-header.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-header.BorderSizePixel = 0
-header.Parent = leftPanel
+-- Speed UI Header
+local speedHeader = Instance.new("TextLabel")
+speedHeader.Name = "Header"
+speedHeader.Text = "SPEED CONTROL"
+speedHeader.Position = UDim2.new(0, 0, 0, 0)
+speedHeader.Size = UDim2.new(1, 0, 0.1, 0)
+speedHeader.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+speedHeader.BorderSizePixel = 0
+speedHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedHeader.TextSize = 14
+speedHeader.Font = Enum.Font.GothamBold
+speedHeader.Parent = speedControlUI
 
-local headerTitle = Instance.new("TextLabel")
-headerTitle.Name = "Title"
-headerTitle.Text = "VYRE HUB"
-headerTitle.Position = UDim2.new(0.05, 0, 0, 0)
-headerTitle.Size = UDim2.new(0.5, 0, 1, 0)
-headerTitle.BackgroundTransparency = 1
-headerTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-headerTitle.TextSize = 16
-headerTitle.Font = Enum.Font.GothamBold
-headerTitle.TextXAlignment = Enum.TextXAlignment.Left
-headerTitle.Parent = header
+-- Speed Value Label
+local speedValueLabel = Instance.new("TextLabel")
+speedValueLabel.Name = "ValueLabel"
+speedValueLabel.Text = "Speed: " .. speedValue
+speedValueLabel.Position = UDim2.new(0.1, 0, 0.15, 0)
+speedValueLabel.Size = UDim2.new(0.8, 0, 0.15, 0)
+speedValueLabel.BackgroundTransparency = 1
+speedValueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedValueLabel.TextSize = 13
+speedValueLabel.Font = Enum.Font.GothamBold
+speedValueLabel.Parent = speedControlUI
 
-local headerSubtitle = Instance.new("TextLabel")
-headerSubtitle.Name = "Subtitle"
-headerSubtitle.Text = "v1  By: VYRE"
-headerSubtitle.Position = UDim2.new(0.35, 0, 0, 0)
-headerSubtitle.Size = UDim2.new(0.4, 0, 1, 0)
-headerSubtitle.BackgroundTransparency = 1
-headerSubtitle.TextColor3 = Color3.fromRGB(150, 150, 150)
-headerSubtitle.TextSize = 11
-headerSubtitle.Font = Enum.Font.Gotham
-headerSubtitle.TextXAlignment = Enum.TextXAlignment.Left
-headerSubtitle.Parent = header
+-- Speed Input Box
+local speedInput = Instance.new("TextBox")
+speedInput.Name = "SpeedInput"
+speedInput.Text = tostring(speedValue)
+speedInput.Position = UDim2.new(0.1, 0, 0.35, 0)
+speedInput.Size = UDim2.new(0.8, 0, 0.15, 0)
+speedInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+speedInput.BorderSizePixel = 1
+speedInput.BorderColor3 = Color3.fromRGB(100, 100, 100)
+speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedInput.TextSize = 12
+speedInput.Font = Enum.Font.Gotham
+speedInput.Parent = speedControlUI
 
-local closeBtn = Instance.new("TextButton")
-closeBtn.Name = "CloseBtn"
-closeBtn.Text = "−"
-closeBtn.Position = UDim2.new(0.92, 0, 0.15, 0)
-closeBtn.Size = UDim2.new(0.08, 0, 0.06, 0)
-closeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.TextSize = 20
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.BorderSizePixel = 1
-closeBtn.BorderColor3 = Color3.fromRGB(100, 100, 100)
-closeBtn.Parent = header
+-- Speed Toggle Button
+local speedToggleBtn = Instance.new("TextButton")
+speedToggleBtn.Name = "ToggleBtn"
+speedToggleBtn.Text = speedEnabled and "SPEED: ON" or "SPEED: OFF"
+speedToggleBtn.Position = UDim2.new(0.1, 0, 0.55, 0)
+speedToggleBtn.Size = UDim2.new(0.8, 0, 0.15, 0)
+speedToggleBtn.BackgroundColor3 = speedEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+speedToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedToggleBtn.TextSize = 12
+speedToggleBtn.Font = Enum.Font.GothamBold
+speedToggleBtn.BorderSizePixel = 1
+speedToggleBtn.BorderColor3 = Color3.fromRGB(100, 100, 100)
+speedToggleBtn.Parent = speedControlUI
 
-closeBtn.MouseButton1Click:Connect(function()
-	leftPanel.Visible = not leftPanel.Visible
+speedToggleBtn.MouseButton1Click:Connect(function()
+	speedEnabled = not speedEnabled
+	speedToggleBtn.Text = speedEnabled and "SPEED: ON" or "SPEED: OFF"
+	speedToggleBtn.BackgroundColor3 = speedEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+	if speedEnabled then
+		print("⚡ Speed: ENABLED (" .. speedValue .. ")")
+	else
+		print("⚡ Speed: DISABLED")
+	end
 end)
 
--- Left sidebar with logo and menu
-local sidebar = Instance.new("Frame")
-sidebar.Name = "Sidebar"
-sidebar.Position = UDim2.new(0, 0, 0.08, 0)
-sidebar.Size = UDim2.new(0.25, 0, 0.92, 0)
-sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-sidebar.BorderSizePixel = 1
-sidebar.BorderColor3 = Color3.fromRGB(50, 50, 50)
-sidebar.Parent = leftPanel
+-- Close Button
+local closeSpeedBtn = Instance.new("TextButton")
+closeSpeedBtn.Name = "CloseBtn"
+closeSpeedBtn.Text = "X"
+closeSpeedBtn.Position = UDim2.new(0.88, 0, 0.01, 0)
+closeSpeedBtn.Size = UDim2.new(0.1, 0, 0.08, 0)
+closeSpeedBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeSpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeSpeedBtn.TextSize = 12
+closeSpeedBtn.Font = Enum.Font.GothamBold
+closeSpeedBtn.BorderSizePixel = 0
+closeSpeedBtn.Parent = speedControlUI
 
--- Logo (Vyre Hub with image)
-local logoFrame = Instance.new("Frame")
-logoFrame.Name = "Logo"
-logoFrame.Position = UDim2.new(0.05, 0, 0.02, 0)
-logoFrame.Size = UDim2.new(0.9, 0, 0.18, 0)
-logoFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-logoFrame.BorderSizePixel = 1
-logoFrame.BorderColor3 = Color3.fromRGB(150, 0, 255)
-logoFrame.Parent = sidebar
+closeSpeedBtn.MouseButton1Click:Connect(function()
+	speedControlUI.Visible = false
+end)
 
-local logoImage = Instance.new("ImageLabel")
-logoImage.Name = "LogoImage"
-logoImage.Image = "https://chatgpt.com/backend-api/estuary/content?id=file_0000000098a071f49586eca85d0aa933&ts=494562&p=fsns&cid=1&sig=f6f45412c10c338d69a1e7a2a85f022605a5c0698c98fa8aa33a8ade0c0e2228&v=0"
-logoImage.Position = UDim2.new(0, 0, 0, 0)
-logoImage.Size = UDim2.new(1, 0, 1, 0)
-logoImage.BackgroundTransparency = 1
-logoImage.Parent = logoFrame
+-- Update speed value when input changes
+speedInput.FocusLost:Connect(function()
+	local newSpeed = tonumber(speedInput.Text)
+	if newSpeed then
+		speedValue = newSpeed
+		speedValueLabel.Text = "Speed: " .. speedValue
+		print("Speed value updated to: " .. speedValue)
+	else
+		speedInput.Text = tostring(speedValue)
+	end
+end)
 
--- Menu buttons
-local menuItems = {"Bat Aimbot", "Mechanics", "Movement", "Settings"}
-for i, item in ipairs(menuItems) do
-	local btn = Instance.new("TextButton")
-	btn.Name = item
-	btn.Text = item
-	btn.Position = UDim2.new(0, 0, 0.25 + (i-1) * 0.15, 0)
-	btn.Size = UDim2.new(1, 0, 0.12, 0)
-	btn.BackgroundColor3 = i == 1 and Color3.fromRGB(40, 40, 40) or Color3.fromRGB(20, 20, 20)
-	btn.BorderSizePixel = 0
-	btn.TextColor3 = Color3.fromRGB(150, 150, 150)
-	btn.TextSize = 13
-	btn.Font = Enum.Font.Gotham
-	btn.Parent = sidebar
-	
-	btn.MouseButton1Click:Connect(function()
-		print(item .. " clicked")
-	end)
-end
-
--- Content panel (right side of left panel)
-local contentPanel = Instance.new("Frame")
-contentPanel.Name = "ContentPanel"
-contentPanel.Position = UDim2.new(0.25, 0, 0.08, 0)
-contentPanel.Size = UDim2.new(0.75, 0, 0.92, 0)
-contentPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-contentPanel.BorderSizePixel = 1
-contentPanel.BorderColor3 = Color3.fromRGB(50, 50, 50)
-contentPanel.Parent = leftPanel
-
--- Content title
-local contentTitle = Instance.new("TextLabel")
-contentTitle.Name = "Title"
-contentTitle.Text = "SPEED CONFIGURATION"
-contentTitle.Position = UDim2.new(0.05, 0, 0.02, 0)
-contentTitle.Size = UDim2.new(0.9, 0, 0.08, 0)
-contentTitle.BackgroundTransparency = 1
-contentTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-contentTitle.TextSize = 14
-contentTitle.Font = Enum.Font.GothamBold
-contentTitle.TextXAlignment = Enum.TextXAlignment.Left
-contentTitle.Parent = contentPanel
-
--- Speed configuration items
-local speedItems = {
-	{label = "Normal Speed", desc = "walking / running speed", value = "55.5"},
-	{label = "Carry Speed", desc = "speed on velocity", value = "23.3"},
-	{label = "Lagger Speed", desc = "speed in lagger mode", value = "12.8"},
-}
-
-for i, item in ipairs(speedItems) do
-	local itemFrame = Instance.new("Frame")
-	itemFrame.Name = "SpeedItem" .. i
-	itemFrame.Position = UDim2.new(0.05, 0, 0.12 + (i-1) * 0.2, 0)
-	itemFrame.Size = UDim2.new(0.9, 0, 0.16, 0)
-	itemFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	itemFrame.BorderSizePixel = 1
-	itemFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
-	itemFrame.Parent = contentPanel
-	
-	local label = Instance.new("TextLabel")
-	label.Text = item.label
-	label.Position = UDim2.new(0.05, 0, 0, 0)
-	label.Size = UDim2.new(0.5, 0, 0.5, 0)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.TextSize = 12
-	label.Font = Enum.Font.GothamBold
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = itemFrame
-	
-	local desc = Instance.new("TextLabel")
-	desc.Text = item.desc
-	desc.Position = UDim2.new(0.05, 0, 0.5, 0)
-	desc.Size = UDim2.new(0.5, 0, 0.5, 0)
-	desc.BackgroundTransparency = 1
-	desc.TextColor3 = Color3.fromRGB(100, 100, 100)
-	desc.TextSize = 10
-	desc.Font = Enum.Font.Gotham
-	desc.TextXAlignment = Enum.TextXAlignment.Left
-	desc.Parent = itemFrame
-	
-	local value = Instance.new("TextLabel")
-	value.Text = item.value
-	value.Position = UDim2.new(0.6, 0, 0.15, 0)
-	value.Size = UDim2.new(0.35, 0, 0.7, 0)
-	value.BackgroundTransparency = 1
-	value.TextColor3 = Color3.fromRGB(255, 255, 255)
-	value.TextSize = 13
-	value.Font = Enum.Font.GothamBold
-	value.TextXAlignment = Enum.TextXAlignment.Center
-	value.Parent = itemFrame
-end
-
--- Mode and Lagger Mode
-local modeFrame = Instance.new("Frame")
-modeFrame.Name = "ModeFrame"
-modeFrame.Position = UDim2.new(0.05, 0, 0.72, 0)
-modeFrame.Size = UDim2.new(0.9, 0, 0.1, 0)
-modeFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-modeFrame.BorderSizePixel = 1
-modeFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
-modeFrame.Parent = contentPanel
-
-local modeLabel = Instance.new("TextLabel")
-modeLabel.Text = "Modo"
-modeLabel.Position = UDim2.new(0.05, 0, 0, 0)
-modeLabel.Size = UDim2.new(0.3, 0, 1, 0)
-modeLabel.BackgroundTransparency = 1
-modeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-modeLabel.TextSize = 12
-modeLabel.Font = Enum.Font.GothamBold
-modeLabel.TextXAlignment = Enum.TextXAlignment.Left
-modeLabel.Parent = modeFrame
-
-local modeValue = Instance.new("TextLabel")
-modeValue.Text = "Normal"
-modeValue.Position = UDim2.new(0.4, 0, 0, 0)
-modeValue.Size = UDim2.new(0.25, 0, 1, 0)
-modeValue.BackgroundTransparency = 1
-modeValue.TextColor3 = Color3.fromRGB(255, 255, 255)
-modeValue.TextSize = 12
-modeValue.Font = Enum.Font.GothamBold
-modeValue.TextXAlignment = Enum.TextXAlignment.Left
-modeValue.Parent = modeFrame
-
-local modeKey = Instance.new("TextLabel")
-modeKey.Text = "Q"
-modeKey.Position = UDim2.new(0.75, 0, 0, 0)
-modeKey.Size = UDim2.new(0.2, 0, 1, 0)
-modeKey.BackgroundTransparency = 1
-modeKey.TextColor3 = Color3.fromRGB(255, 255, 255)
-modeKey.TextSize = 12
-modeKey.Font = Enum.Font.GothamBold
-modeKey.TextXAlignment = Enum.TextXAlignment.Right
-modeKey.Parent = modeFrame
-
--- Lagger Mode Toggle
-local laggerFrame = Instance.new("Frame")
-laggerFrame.Name = "LaggerFrame"
-laggerFrame.Position = UDim2.new(0.05, 0, 0.85, 0)
-laggerFrame.Size = UDim2.new(0.9, 0, 0.1, 0)
-laggerFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-laggerFrame.BorderSizePixel = 1
-laggerFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
-laggerFrame.Parent = contentPanel
-
-local laggerLabel = Instance.new("TextLabel")
-laggerLabel.Text = "Lagger Mode"
-laggerLabel.Position = UDim2.new(0.05, 0, 0, 0)
-laggerLabel.Size = UDim2.new(0.5, 0, 1, 0)
-laggerLabel.BackgroundTransparency = 1
-laggerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-laggerLabel.TextSize = 12
-laggerLabel.Font = Enum.Font.GothamBold
-laggerLabel.TextXAlignment = Enum.TextXAlignment.Left
-laggerLabel.Parent = laggerFrame
-
-local toggleFrame = Instance.new("Frame")
-toggleFrame.Name = "Toggle"
-toggleFrame.Position = UDim2.new(0.75, 0, 0.25, 0)
-toggleFrame.Size = UDim2.new(0.2, 0, 0.5, 0)
-toggleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleFrame.BorderSizePixel = 1
-toggleFrame.BorderColor3 = Color3.fromRGB(100, 100, 100)
-toggleFrame.Parent = laggerFrame
-
-local toggleCircle = Instance.new("Frame")
-toggleCircle.Name = "Circle"
-toggleCircle.Position = UDim2.new(0.05, 0, 0.1, 0)
-toggleCircle.Size = UDim2.new(0.4, 0, 0.8, 0)
-toggleCircle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-toggleCircle.BorderSizePixel = 0
-toggleCircle.Parent = toggleFrame
-
-local laggerKey = Instance.new("TextLabel")
-laggerKey.Text = "R"
-laggerKey.Position = UDim2.new(0.55, 0, 0, 0)
-laggerKey.Size = UDim2.new(0.35, 0, 1, 0)
-laggerKey.BackgroundTransparency = 1
-laggerKey.TextColor3 = Color3.fromRGB(255, 255, 255)
-laggerKey.TextSize = 12
-laggerKey.Font = Enum.Font.GothamBold
-laggerKey.TextXAlignment = Enum.TextXAlignment.Center
-laggerKey.Parent = laggerFrame
-
--- Bottom stats
-local statsFrame = Instance.new("Frame")
-statsFrame.Name = "Stats"
-statsFrame.Position = UDim2.new(0.05, 0, 0.97, 0)
-statsFrame.Size = UDim2.new(0.9, 0, 0.02, 0)
-statsFrame.BackgroundTransparency = 1
-statsFrame.Parent = contentPanel
-
-local stat1 = Instance.new("TextLabel")
-stat1.Text = "0%"
-stat1.Position = UDim2.new(0, 0, 0, 0)
-stat1.Size = UDim2.new(0.3, 0, 1, 0)
-stat1.BackgroundTransparency = 1
-stat1.TextColor3 = Color3.fromRGB(100, 100, 100)
-stat1.TextSize = 10
-stat1.Font = Enum.Font.Gotham
-stat1.TextXAlignment = Enum.TextXAlignment.Left
-stat1.Parent = statsFrame
-
-local stat2 = Instance.new("TextLabel")
-stat2.Text = "Radius: 20"
-stat2.Position = UDim2.new(0.5, 0, 0, 0)
-stat2.Size = UDim2.new(0.5, 0, 1, 0)
-stat2.BackgroundTransparency = 1
-stat2.TextColor3 = Color3.fromRGB(100, 100, 100)
-stat2.TextSize = 10
-stat2.Font = Enum.Font.Gotham
-stat2.TextXAlignment = Enum.TextXAlignment.Right
-stat2.Parent = statsFrame
-
--- ===== RIGHT PANEL (Buttons) =====
+-- ===== RIGHT PANEL (Buttons Only) =====
 local rightPanel = Instance.new("Frame")
 rightPanel.Name = "RightPanel"
-rightPanel.Position = UDim2.new(0.73, 0, 0.08, 0)
-rightPanel.Size = UDim2.new(0.25, 0, 0.85, 0)
+rightPanel.Position = UDim2.new(0.75, 0, 0.1, 0)
+rightPanel.Size = UDim2.new(0.22, 0, 0.8, 0)
 rightPanel.BackgroundTransparency = 1
 rightPanel.Parent = screenGui
+
+-- Function to create rounded button
+local function createRoundedButton(parent, name, text, row, col)
+	local btn = Instance.new("TextButton")
+	btn.Name = name
+	btn.Text = text
+	btn.Position = UDim2.new(col * 0.5, 8, row * 0.25, 8)
+	btn.Size = UDim2.new(0.5, -16, 0.22, -16)
+	btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 13
+	btn.Font = Enum.Font.GothamBold
+	btn.BorderSizePixel = 0
+	btn.Parent = parent
+	
+	-- Create rounded corners using UICorner
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 12)
+	corner.Parent = btn
+	
+	-- Hover effects
+	btn.MouseEnter:Connect(function()
+		btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	end)
+	btn.MouseLeave:Connect(function()
+		btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	end)
+	
+	return btn
+end
 
 -- ===== FUNCTIONALITY =====
 
@@ -342,7 +172,8 @@ local function toggleAutoDuel()
 	autoDuelEnabled = not autoDuelEnabled
 	if autoDuelEnabled then
 		print("⚔️ Auto Duel: ENABLED")
-		-- Auto duel logic here
+		-- Find opponent base and steal brainrot
+		-- Then return to your base and win
 	else
 		print("⚔️ Auto Duel: DISABLED")
 	end
@@ -353,7 +184,7 @@ local function toggleAimBot()
 	aimBotEnabled = not aimBotEnabled
 	if aimBotEnabled then
 		print("🎯 Aim Bot: ENABLED")
-		-- Aim bot logic here
+		-- Take to opponent, equip bat, hit them to prevent winning
 	else
 		print("🎯 Aim Bot: DISABLED")
 	end
@@ -364,77 +195,40 @@ local function toggleRideDih()
 	rideDihEnabled = not rideDihEnabled
 	if rideDihEnabled then
 		print("⬆️⬇️ Ride Dih: ENABLED")
-		-- Ride dih logic - move up and down
-		while rideDihEnabled do
-			humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 2, 0)
-			wait(0.1)
-			humanoidRootPart.CFrame = humanoidRootPart.CFrame - Vector3.new(0, 2, 0)
-			wait(0.1)
-		end
+		-- Move up and down loop
+		task.spawn(function()
+			while rideDihEnabled do
+				humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 2, 0)
+				wait(0.1)
+				humanoidRootPart.CFrame = humanoidRootPart.CFrame - Vector3.new(0, 2, 0)
+				wait(0.1)
+			end
+		end)
 	else
 		print("⬆️⬇️ Ride Dih: DISABLED")
 	end
 end
 
--- Carry Speed Function
-local function toggleCarrySpeed()
-	carrySpeedEnabled = not carrySpeedEnabled
-	if carrySpeedEnabled then
-		print("🏃 Carry Speed: ENABLED")
-		-- Apply carry speed boost
-	else
-		print("🏃 Carry Speed: DISABLED")
-	end
+-- Open Speed Control UI
+local function openSpeedControl()
+	speedControlUI.Visible = true
+	print("📊 Speed Control UI Opened")
 end
 
--- Lagger Mode Function
-local function toggleLaggerMode()
-	laggerModeEnabled = not laggerModeEnabled
-	if laggerModeEnabled then
-		print("⚡ Lagger Mode: ENABLED")
-		-- Lagger mode logic - create lag for opponent
-	else
-		print("⚡ Lagger Mode: DISABLED")
-	end
-end
+-- Create buttons
+local autoDuelBtn = createRoundedButton(rightPanel, "AutoDuel", "AUTO\nDUEL", 0, 0)
+autoDuelBtn.MouseButton1Click:Connect(toggleAutoDuel)
 
--- Button configurations with functionality
-local buttonConfigs = {
-	{name = "AUTO DUEL", text = "AUTO\nDUEL", row = 0, col = 0, func = toggleAutoDuel},
-	{name = "AIM BOT", text = "AIM\nBOT", row = 0, col = 1, func = toggleAimBot},
-	{name = "RIDE DIH", text = "RIDE\nDIH", row = 1, col = 0, func = toggleRideDih},
-	{name = "CARRY SPD", text = "CARRY\nSPEED", row = 1, col = 1, func = toggleCarrySpeed},
-	{name = "LAGGER MODE", text = "LAGGER\nMODE", row = 2, col = 0, func = toggleLaggerMode},
-}
+local aimBotBtn = createRoundedButton(rightPanel, "AimBot", "AIM\nBOT", 0, 1)
+aimBotBtn.MouseButton1Click:Connect(toggleAimBot)
 
-for _, config in ipairs(buttonConfigs) do
-	local btn = Instance.new("TextButton")
-	btn.Name = config.name
-	btn.Text = config.text
-	btn.Position = UDim2.new(config.col * 0.5, 8, config.row * 0.22, 8)
-	btn.Size = UDim2.new(0.5, -16, 0.2, -16)
-	btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.TextSize = 12
-	btn.Font = Enum.Font.GothamBold
-	btn.BorderSizePixel = 2
-	btn.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	btn.Parent = rightPanel
-	
-	btn.MouseEnter:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-		btn.BorderColor3 = Color3.fromRGB(150, 150, 150)
-	end)
-	btn.MouseLeave:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-		btn.BorderColor3 = Color3.fromRGB(80, 80, 80)
-	end)
-	
-	btn.MouseButton1Click:Connect(function()
-		if config.func then
-			config.func()
-		end
-	end)
-end
+local rideDihBtn = createRoundedButton(rightPanel, "RideDih", "RIDE\nDIH", 1, 0)
+rideDihBtn.MouseButton1Click:Connect(toggleRideDih)
 
-print("Vyre Hub loaded successfully!")
+local carrySpeedBtn = createRoundedButton(rightPanel, "CarrySpeed", "CARRY\nSPD", 1, 1)
+carrySpeedBtn.MouseButton1Click:Connect(openSpeedControl)
+
+local speedBtn = createRoundedButton(rightPanel, "Speed", "SPEED", 2, 0)
+speedBtn.MouseButton1Click:Connect(openSpeedControl)
+
+print("✅ Vyre Hub loaded successfully!")
